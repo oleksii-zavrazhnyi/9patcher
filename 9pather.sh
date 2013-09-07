@@ -8,21 +8,38 @@ if [ -z "$1" ]; then
 	echo "Crops central repeatable pixels"
 	echo ""
 	echo "Usage:"
-	echo "       9patch.sh file"
-	echo "       9patch.sh file1 file2 ... fileN"
-	echo "       9patch.sh *.png"
-	echo "       9patch.sh button_*"
+	echo "       9patch.sh [-skip X] file"
+	echo "       9patch.sh [-skip X] file1 file2 ... fileN"
+	echo "       9patch.sh [-skip X] *.png"
+	echo "       9patch.sh [-skip X] button_*"
+	echo "Parameters:"
+	echo "       -skip: Skip first X pixels"
+	echo "              (for example: 9patch.sh -skip 40 file1 file2 file3)"
 	exit 1
 fi
 
 if [ "$1" = "-v" ]; then
-	echo "9patcher v1.1"
+	echo "9patcher v1.2"
 	exit 0
+fi
+
+SKIP=0
+if [ "$1" = "-skip" ]; then
+	SKIP=$2
 fi
 
 # cycling through all the passed files
 for FILE in "$@"
 do
+	if [ $SKIP -gt 0 ]; then
+		if [ "$FILE" = "$1" ]; then
+			continue 2
+		fi
+		if [ "$FILE" = "$2" ]; then
+			continue 2
+		fi
+	fi
+
 	echo -n "Processing ${FILE}..."
 
 	# checking for a proper image
@@ -41,10 +58,17 @@ do
 	WIDTH=`echo $WH | awk -F 'x' {'print $1'}`
 	HEIGHT=`echo $WH | awk -F 'x' {'print $2'}`
 
-	# determine first releatable column
-	START1=2
-	START2=4
+	# determine initial offset
+	if [ $SKIP -gt 0 ]; then
+		START1=$SKIP
+	else
+		START1=2
+	fi
+		
+	let START2=START1+2
 	FOUND=0
+
+	# determine first repeatable column
 	while [ $FOUND -eq 0 ]; do
 		if [ $START2 -eq $WIDTH ]; then
 			# there is no repeatable columns in this image
