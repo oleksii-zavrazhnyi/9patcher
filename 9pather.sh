@@ -16,25 +16,28 @@ if [ -z "$1" ]; then
 fi
 
 if [ "$1" = "-v" ]; then
-	echo "9patcher v1.0"
+	echo "9patcher v1.1"
 	exit 0
 fi
 
 # cycling through all the passed files
 for FILE in "$@"
 do
-	echo -n "Processing $FILE..."
+	echo -n "Processing ${FILE}..."
 
 	# checking for a proper image
-	CHECK=`identify $FILE 2>&1`
+	CHECK=`identify -format "%wx%h" "${FILE}" 2>&1`
 	STATUS=$?
 	if [ $STATUS -ne 0 ]; then
 		echo -e "$(tput setaf 1) ERROR (not an image) $(tput setaf 7)"
 		continue 1
 	fi
 
+	# generate temp file name template
+	TMP=`mktemp /tmp/9patch_XXXXXXXXXXXX`
+
 	# get image resolution
-	WH=`identify $FILE 2>&1 | awk {'print $3'} 2>&1`
+	WH=`identify -format "%wx%h" "${FILE}" 2>&1`
 	WIDTH=`echo $WH | awk -F 'x' {'print $1'}`
 	HEIGHT=`echo $WH | awk -F 'x' {'print $2'}`
 
@@ -46,13 +49,13 @@ do
 		if [ $START2 -eq $WIDTH ]; then
 			# there is no repeatable columns in this image
 			echo -e "$(tput setaf 1) ERROR (invalid or already patched)$(tput setaf 7)"
-			rm -rf /tmp/$FILE-start-*
+			rm -rf ${TMP}*
 			continue 2
 		fi
 
-		convert $FILE -gravity West -crop 2x$HEIGHT+$START1+0 /tmp/$FILE-start-$START1.png > /dev/null 2>&1
-		convert $FILE -gravity West -crop 2x$HEIGHT+$START2+0 /tmp/$FILE-start-$START2.png > /dev/null 2>&1
-		COMP=`compare -metric AE /tmp/$FILE-start-$START1.png /tmp/$FILE-start-$START2.png /dev/null 2>&1`
+		convert "${FILE}" -gravity West -crop 2x${HEIGHT}+${START1}+0 ${TMP}${START1}.png > /dev/null 2>&1
+		convert "${FILE}" -gravity West -crop 2x${HEIGHT}+${START2}+0 ${TMP}${START2}.png > /dev/null 2>&1
+		COMP=`compare -metric AE ${TMP}${START1}.png ${TMP}${START2}.png /dev/null 2>&1`
 		if [ "$COMP" = "0" ]; then
 			# repeatable column found
 			FOUND=1
@@ -63,18 +66,18 @@ do
 	done
 
 	# remove columns temp files
-	rm -rf $FILE-start-*
+	rm -rf ${TMP}*
 
 	# crop an image
-	convert $FILE -gravity West -crop ${START1}x$HEIGHT+0+0 /tmp/$FILE-9patch-1.png > /dev/null 2>&1
-	convert $FILE -gravity Center -crop 2x$HEIGHT+0+0 /tmp/$FILE-9patch-2.png > /dev/null 2>&1
-	convert $FILE -gravity East -crop ${START1}x$HEIGHT+0+0 /tmp/$FILE-9patch-3.png > /dev/null 2>&1
+	convert "${FILE}" -gravity West -crop ${START1}x${HEIGHT}+0+0 ${TMP}west.png > /dev/null 2>&1
+	convert "${FILE}" -gravity Center -crop 2x${HEIGHT}+0+0 ${TMP}center.png > /dev/null 2>&1
+	convert "${FILE}" -gravity East -crop ${START1}x${HEIGHT}+0+0 ${TMP}east.png > /dev/null 2>&1
 
 	# concatenate a final image
-	montage /tmp/$FILE-9patch-*.png -mode Concatenate -tile x1 -background none $FILE > /dev/null 2>&1
+	montage ${TMP}west.png ${TMP}center.png ${TMP}east.png -mode Concatenate -tile x1 -background none "${FILE}" > /dev/null 2>&1
 
 	# remove temp files
-	rm -rf /tmp/$FILE-9patch*
+	rm -rf ${TMP}*
 
 	# image done
 	echo -e "$(tput setaf 2) OK$(tput setaf 7)"
