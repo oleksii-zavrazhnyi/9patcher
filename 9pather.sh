@@ -12,6 +12,7 @@ if [ -z "$1" ]; then
 	echo "       9patch.sh file1 file2 ... fileN"
 	echo "       9patch.sh *.png"
 	echo "       9patch.sh button_*"
+	exit 1
 fi
 
 if [ "$1" = "-v" ]; then
