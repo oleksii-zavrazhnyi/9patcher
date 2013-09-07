@@ -6,15 +6,16 @@
 if [ -z "$1" ]; then
 	echo "9path-ready automatic images generator"
 	echo "Crops central repeatable pixels"
+	echo "https://github.com/TheMengzor/9patcher"
 	echo ""
 	echo "Usage:"
-	echo "       9patch.sh [-skip X] file"
-	echo "       9patch.sh [-skip X] file1 file2 ... fileN"
-	echo "       9patch.sh [-skip X] *.png"
-	echo "       9patch.sh [-skip X] button_*"
+	echo "       9patch [-skip X] file"
+	echo "       9patch [-skip X] file1 file2 ... fileN"
+	echo "       9patch [-skip X] *.png"
+	echo "       9patch [-skip X] button_*"
 	echo "Parameters:"
 	echo "       -skip: Skip first X pixels"
-	echo "              (for example: 9patch.sh -skip 40 file1 file2 file3)"
+	echo "              (for example: 9patch -skip 40 file1 file2 file3)"
 	exit 1
 fi
 
