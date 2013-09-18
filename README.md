@@ -23,7 +23,7 @@ Installation
 git clone git@github.com:TheMengzor/9patcher.git
 cd 9patcher
 chmod +x ./9patcher.sh
-sudo ln 9pather /usr/bin/9patcher.sh
+sudo ln 9pather.sh /usr/bin/9patcher
 ```
 
 Usage
