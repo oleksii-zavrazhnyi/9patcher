@@ -20,7 +20,7 @@ if [ -z "$1" ]; then
 fi
 
 if [ "$1" = "-v" ]; then
-	echo "9patcher v1.2"
+	echo "9patcher v1.2.1"
 	exit 0
 fi
 
@@ -73,7 +73,7 @@ do
 	while [ $FOUND -eq 0 ]; do
 		if [ $START2 -eq $WIDTH ]; then
 			# there is no repeatable columns in this image
-			echo -e "$(tput setaf 1) ERROR (invalid or already patched)$(tput setaf 7)"
+			echo -e "$(tput setaf 1) ERROR (invalid or already patched)$(tput sgr0)"
 			rm -rf ${TMP}*
 			continue 2
 		fi
@@ -105,5 +105,5 @@ do
 	rm -rf ${TMP}*
 
 	# image done
-	echo -e "$(tput setaf 2) OK$(tput setaf 7)"
+	echo -e "$(tput setaf 2) OK$(tput sgr0)"
 done
